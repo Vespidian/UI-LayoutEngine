@@ -1,0 +1,1 @@
+This is a C library for user interface layout (Layout of panels, buttons, scrolling panels, etc). Currently it is being written embedded in to my [game engine ](https://github.com/Vespidian/GameFramework) for ease of testing and visualization. The plan is to eventually make this a standalone library with minimal to no dependencies.

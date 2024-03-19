@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "Root",
+			"path": ".",
+		}
+	],
+	"settings": {
+		"files.exclude":{
+			"include/": true,
+			"lib/": true,
+			"bin/*.dll": true,
+			"**/*.o": true,
+			"**/*.d": true,
+		}
+		"problems.decorations.enabled": false,
+		"explorer.sortOrder": "type",
+	}
+}
