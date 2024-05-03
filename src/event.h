@@ -29,7 +29,7 @@ extern iVector2 mouse_pos_previous;
 extern bool enable_input;
 extern bool mouse_held;
 extern bool mouse_clicked;
-extern bool mouse_lifted;
+extern bool mouse_released;
 extern int scroll_value;
 
 void InitEvents();

@@ -23,7 +23,7 @@ bool enable_input = true;
 
 bool mouse_held = false;
 bool mouse_clicked = false;
-bool mouse_lifted = false;
+bool mouse_released = false;
 int scroll_value = 0;
 Vector2 mouse = {0, 0};
 
@@ -103,7 +103,7 @@ void PollEvents(){
 void EventListener(){
 	mouse_clicked = false;
 	mouse_held = false;
-	mouse_lifted = false;
+	mouse_released = false;
 	scroll_value = 0;
 
 	if(enable_input){
@@ -139,7 +139,7 @@ static void MouseClicked(EventData event){
 }
 static void MouseUp(EventData event){
 	if(event.e->key.state == SDL_RELEASED){
-		mouse_lifted = true;
+		mouse_released = true;
 	}
 }
 static void Scroll(EventData event){

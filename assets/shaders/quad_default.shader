@@ -21,6 +21,13 @@
 			flat out vec4 texture_src_f;
 
 
+
+			float random(vec2 st)
+			{
+				return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+			}
+
+
 			void main(){
 				gl_Position = projection * model_a * vec4(pos_a, 1);
 				

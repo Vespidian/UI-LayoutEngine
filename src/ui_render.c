@@ -18,6 +18,52 @@ void UIRenderElement(UIElement *element){
             element->transform.w
         };
 
-        RenderQuad(texture, NULL, &r, 0, (Vector4){1, 0, 1, 1}, 0);
+        Vector4 color = {
+            element->style.color.x,
+            element->style.color.y,
+            element->style.color.z,
+            1
+        };
+
+        RenderQuad(texture, NULL, &r, 0, color, 0);
+    }
+}
+
+void UIRenderSubElements(UIElement *element){
+    if(element != NULL){
+        // Initially we create an array of all children
+        UIElement **children;
+        unsigned int num_children = 1;
+        children = malloc(sizeof(UIElement) * (num_children + 1));
+        children[0] = element;
+        children[num_children + 1] = NULL;
+
+	    if(element->num_children != 0){
+            for(int i = 0; children[i] != NULL; i++){
+                if(children[i]->num_children == 0){
+                    continue;
+                }
+
+                num_children += children[i]->num_children;
+                children = realloc(children, sizeof(UIElement) * (num_children + 1));
+
+                for(int k = 0; k < children[i]->num_children; k++){
+                    children[num_children - children[i]->num_children + k] = &children[i]->children[k];
+                }
+                children[num_children] = NULL;
+            }
+
+            
+        }else{
+            UIRenderElement(element);
+        }
+
+        // Loop from leaves to root
+        for(int i = (num_children - 1); i >= 0; i--){
+            UIRenderElement(children[i]);
+        }
+
+        free(children);
+        children = NULL;
     }
 }
