@@ -4,188 +4,9 @@
 
 #include "vectorlib.h"
 #include "debug.h"
-#include "ui_layout.h"
+#include "ui.h"
 
-int global_num_classes = 0;
-
-UIClass UINewClass(){
-	UIClass c;
-
-	c.id = global_num_classes++;
-	c.offset = (iVector2){2147483647, 2147483647};
-
-	c.size_min = (iVector2){-1, -1};
-	c.size_max = (iVector2){-1, -1};
-
-	c.padding = (iVector4){-1, -1, -1, -1};
-	c.border = (iVector4){-1, -1, -1, -1};
-	c.margin = (iVector4){-1, -1, -1, -1};
-	c.color = (Vector3){-1, -1, -1};
-
-	c.wrap = -1;
-	c.wrap_vertical = -1;
-	c.wrap_reverse = -1;
-	c.origin_p = UI_ORIGIN_UNDEFINED;
-	c.origin_c = UI_ORIGIN_UNDEFINED;
-
-	c.culling = -1;
-	c.inherit = false;
-	
-	return c;
-}
-
-UIClass UIElementDefaultClass(){
-	UIClass c;
-
-	c.id = -1;
-	c.offset = (iVector2){0, 0};
-
-	c.size_min = (iVector2){100, 100};
-	c.size_max = (iVector2){200, 200};
-
-	c.padding = (iVector4){10, 10, 10, 10};
-	c.border = (iVector4){0, 0, 0, 0};
-	c.margin = (iVector4){10, 10, 10, 10};
-	c.color = (Vector3){1, 1, 1};
-
-	c.wrap = true;
-	c.wrap_vertical = false;
-	c.wrap_reverse = false;
-	c.origin_p = UI_ORIGIN_NORTHWEST;
-	c.origin_c = UI_ORIGIN_NORTHWEST;
-
-	c.culling = false;
-	c.inherit = false;
-	
-	return c;
-}
-
-UIElement UINewElement(){
-	UIElement e;
-	e.num_children = 0;
-	e.children = NULL;
-
-	e.num_classes = 0;
-	e.classes = NULL;
-	
-	e.num_tmp_classes = 0;
-	e.tmp_classes = NULL;
-
-	e.transform = (iVector4){0, 0, 100, 100};
-	e.mouse_events = 0;
-	e.style = UIElementDefaultClass();
-
-	e.parent = NULL;
-
-	return e;
-}
-
-UIElement *UIElementAddChild(UIElement *parent, UIElement child){
-	// Now to set up the parent
-	child.parent = parent;
-	if(parent != NULL){
-		UIElement *tmp = realloc(parent->children, sizeof(UIElement) * (parent->num_children + 1));
-		if(tmp != NULL){
-			parent->children = tmp;
-			parent->children[parent->num_children] = child;
-			parent->num_children++;
-		}
-	}
-	
-	return &(parent->children[parent->num_children - 1]);
-}
-
-// Free all children of 'element'
-void UIFreeElement(UIElement *element){
-
-	// Initially we create an array of all children
-	UIElement **children;
-	unsigned int num_children = 1;
-	children = malloc(sizeof(UIElement) * (num_children + 1));
-	children[0] = element;
-	children[num_children + 1] = NULL;
-
-	if(children[0]->num_children != 0){
-		for(int i = 0; children[i] != NULL; i++){
-			if(children[i]->num_children == 0){
-				continue;
-			}
-
-			UIElement **tmp = realloc(children, sizeof(UIElement *) * (num_children + children[i]->num_children + 1));
-			if(tmp != NULL){
-				children = tmp;
-				num_children += children[i]->num_children;
-
-				for(int k = 0; k < children[i]->num_children; k++){
-					children[num_children - children[i]->num_children + k] = &children[i]->children[k];
-				}
-			}
-
-		}
-	}
-
-	// Now we go through and free each individual element
-	for(int i = num_children - 1; i >= 0; i++){
-		free(children[i]->classes);
-		children[i]->classes = NULL;
-		children[i]->num_classes = 0;
-
-		if(children[i]->num_children != 0){
-			free(children[i]->children);
-			children[i]->children = NULL;
-			children[i]->num_children = 0;
-		}
-	}
-
-	free(children);
-	children = NULL;
-}
-
-void UIElementAddClass(UIElement *element, UIClass class){
-	if(element != NULL){
-		element->num_classes++;
-		UIClass *tmp = realloc(element->classes, sizeof(UIClass) * (element->num_classes + 1));
-		if(tmp != NULL){
-			element->classes = tmp;
-
-			element->classes[element->num_classes - 1] = class;
-		}else{
-			DebugLog(D_ERR, "%s:%s: error: Could not allocate space in element's class buffer", __FILE__, __LINE__);
-		}
-	}
-}
-
-void UIElementAddTmpClass(UIElement *element, UIClass class){
-	if(element != NULL){
-		element->num_tmp_classes++;
-		UIClass *tmp = realloc(element->tmp_classes, sizeof(UIClass) * (element->num_tmp_classes + 1));
-		if(tmp != NULL){
-			element->tmp_classes = tmp;
-
-			element->tmp_classes[element->num_tmp_classes - 1] = class;
-		}else{
-			DebugLog(D_ERR, "%s:%s: error: Could not allocate space in element's tmp class buffer", __FILE__, __LINE__);
-		}
-	}
-}
-
-UIClass *UIElementFindClass(UIElement *element, int class_id){
-	UIClass *class = NULL;
-	if(element != NULL){
-		for(int i = 0; i < element->num_classes; i++){
-			if(element->classes[i].id == class_id){
-				class = &element->classes[i];
-			}
-		}
-	}
-
-	return class;
-}
-
-
-/**
- * --- LAYOUT ---
-*/
+extern UIClass UIElementDefaultClass();
 
 void UIElementApplyClass(UIElement *element, UIClass *class){
 	// Individually apply each bit of the class if it has been defined
@@ -309,7 +130,6 @@ iVector2 UIElementCalculateOriginP(UIElement *element){
 }
 
 
-
 iVector2 UIElementCalculateOriginC(UIElement *element){
 	iVector2 origin = {0, 0};
 	if(element != NULL){
@@ -371,6 +191,7 @@ iVector2 UIElementCalculateOriginC(UIElement *element){
 
 	return origin;
 }
+
 
 // Must only be called after figuring out the element's size
 void UIElementUpdatePosition(UIElement *element){
@@ -450,6 +271,7 @@ void UIElementUpdatePosition(UIElement *element){
 	}
 }
 
+
 void UIElementUpdateSize(UIElement *element){
 	if(element != NULL){
 		// Reset element's style class
@@ -498,18 +320,6 @@ void UIElementUpdateSize(UIElement *element){
 				sum += element->children[i].style.margin.x;
 				sum += element->children[i].style.margin.z;
 
-				// // Child border
-				// element->transform.w += element->children[i].style.border.y;
-				// element->transform.w += element->children[i].style.border.w;
-				// sum += element->children[i].style.border.x;
-				// sum += element->children[i].style.border.z;
-
-				// // Child padding
-				// element->transform.w += element->children[i].style.padding.y;
-				// element->transform.w += element->children[i].style.padding.w;
-				// sum += element->children[i].style.padding.x;
-				// sum += element->children[i].style.padding.z;
-
 				if(sum > widest){
 					widest = sum;
 				}
@@ -532,18 +342,6 @@ void UIElementUpdateSize(UIElement *element){
 				element->transform.z += element->children[i].style.margin.z;
 				sum += element->children[i].style.margin.y;
 				sum += element->children[i].style.margin.w;
-
-				// // Child border
-				// element->transform.z += element->children[i].style.border.x;
-				// element->transform.z += element->children[i].style.border.z;
-				// sum += element->children[i].style.border.y;
-				// sum += element->children[i].style.border.w;
-
-				// // Child padding
-				// element->transform.z += element->children[i].style.padding.x;
-				// element->transform.z += element->children[i].style.padding.z;
-				// sum += element->children[i].style.padding.y;
-				// sum += element->children[i].style.padding.w;
 
 				if(sum > tallest){
 					tallest = sum;

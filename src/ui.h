@@ -74,6 +74,20 @@ typedef enum UI_MOUSE_EVENT{
  * 
 */
 
+/**
+ * Future refactoring idea:
+ * Each class is an array of effects that can be applied to an element.
+ * Each element of this array contains a union of possible value datatypes
+ * and an enum value which dictates what type of effect it is.
+ * 
+ * This should make for a more efficient (faster) and much more expandable
+ * system of adding different class effects
+*/
+typedef struct UIElement UIElement;
+
+typedef void (*UIMouseEventFunc)(UIElement *element);
+typedef void (*UIMouseEventFunc_c)(UIElement *element, UI_MOUSE_EVENT events);
+
 typedef struct UIClass{
 	int id;
 
@@ -121,10 +135,19 @@ typedef struct UIClass{
 	// When 'inherit' is true, the children of this element will be 
 	// automatically given this class
 	bool inherit;
+
+	/** MOUSE EVENTS **/
+	int class_hold_id;
+	int class_hover_id;
+
+	UIMouseEventFunc_c event_func;
+
 }UIClass;
 
 
 typedef struct UIElement{
+	int id;
+
 	struct UIElement *parent;
 	struct UIElement *children;
 	unsigned int num_children;
@@ -162,13 +185,16 @@ UIElement *UIElementAddChild(UIElement *parent, UIElement child);
 void UIFreeElement(UIElement *element);
 
 void UIElementAddClass(UIElement *element, UIClass class);
+void UIElementAddTmpClass(UIElement *element, UIClass class);
 
 void UIElementUpdateChildren(UIElement *element);
 
 
-UIClass UINewClass();
+UIClass *UINewClass();
 
 UIClass *UIElementFindClass(UIElement *element, int class_id);
+UIElement *UIFindElement(UIElement *root, int element_id);
+UIClass *UIFindClass(int class_id);
 
 
 /**
@@ -183,6 +209,9 @@ void UIRenderSubElements(UIElement *element);
  * INTERACT STUFFS
 */
 
-UIElement *UIInteractGetEvent(UIElement *element, UI_MOUSE_EVENT *event_type);
+void UIInteractGetEvent(UIElement *element);
+void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func);
+void UIClassSetEventClass_hold(UIClass *class, UIClass event_class);
+void UIClassSetEventClass_hover(UIClass *class, UIClass event_class);
 
 #endif
