@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <SDL2/SDL.h>
 
 #include "textures.h"
 #include "vectorlib.h"
@@ -11,7 +10,7 @@ extern Texture texture;
 
 void UIRenderElement(UIElement *element){
     if(element != NULL){
-        SDL_Rect r = {
+        Vector4 r = {
             element->transform.x,
             element->transform.y,
             element->transform.z,

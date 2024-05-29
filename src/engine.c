@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <SDL2/SDL.h>
 
 #include "engine.h"
 
@@ -13,7 +12,6 @@
 Shader shader;
 Texture texture;
 
-SDL_Rect rect = {10, 10, 40, 50};
 
 UIElement root;
 UIElement *e1;
@@ -29,11 +27,11 @@ void tmp(UIElement *element, UI_MOUSE_EVENT events){
 }
 
 void EngineSetup(){
-    RendererInit();
+    InitTextures();
     InitQuadRender();
 
     // Basic Texture
-    texture = TextureOpen("../assets/texture.png");
+    texture = TextureOpen("../assets/texture.png", TEXTURE_FILTERING_NEAREST);
     
     // Basic Shader
     shader = ShaderOpen("../assets/shader.shader");
@@ -99,6 +97,10 @@ void EngineSetup(){
     // - get borders to render in the shader
     // - start thinking about percent scaling
 
+    // So we want all classes to be stored in a UIState array
+    // Classes an elements are only ever referenced by their IDs
+    // IDs represent the class or element's position in the 
+    //  corresponding array in the UIState
 
     /**
      * NOTES:
@@ -111,8 +113,6 @@ void EngineSetup(){
 }
 
 void EngineExit(){
-    RendererQuit();
-
     TextureFree(&texture);
     ShaderFree(&shader);
 }
