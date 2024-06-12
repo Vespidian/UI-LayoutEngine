@@ -51,7 +51,7 @@ void RenderText(FontObject *font, float font_size, int x_pos, int y_pos, int ali
 			vsnprintf(formatted_text, length + 1, text, va_format);
 			formatted_text[length] = 0;
 
-			RenderTextEx(font, font_size, x_pos, y_pos, (Vector4){1, 1, 1, 1}, alignment, 0, -1, formatted_text);
+			RenderTextEx(font, font_size, x_pos, y_pos, (Vector4){1, 1, 1, 1}, alignment, 2, -1, formatted_text);
 			
 			free(formatted_text);
 			formatted_text = NULL;

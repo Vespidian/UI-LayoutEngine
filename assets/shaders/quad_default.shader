@@ -58,8 +58,8 @@
 				tex_coord *= texture_src_f.zw / texture_size;
 				tex_coord += texture_src_f.xy / texture_size;
 
-				// FragColor = texture(src_texture, tex_coord) * color_v;
-				FragColor = color_v;
+				FragColor = texture(src_texture, tex_coord) * color_v;
+				// FragColor = color_v;
 				// if(distance(vec2(0.5), tex_coordinate_v.xy)*3 > 1.3){
 				if(FragColor.a < 0.01){
 					discard;

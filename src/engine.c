@@ -7,13 +7,14 @@
 #include "shader.h"
 #include "renderer/renderer.h"
 #include "renderer/quad.h"
+#include "render_text.h"
 #include "ui.h"
 
 Shader shader;
 Texture texture;
 
-
-UIElement root;
+UIState state;
+UIElement *root;
 UIElement *e1;
 UIClass *class1;
 UIClass *class2;
@@ -29,6 +30,7 @@ void tmp(UIElement *element, UI_MOUSE_EVENT events){
 void EngineSetup(){
     InitTextures();
     InitQuadRender();
+    InitFonts();
 
     // Basic Texture
     texture = TextureOpen("../assets/texture.png", TEXTURE_FILTERING_NEAREST);
@@ -36,62 +38,75 @@ void EngineSetup(){
     // Basic Shader
     shader = ShaderOpen("../assets/shader.shader");
 
-    class1 = UINewClass();
-    class1->color = (Vector3){0.839, 0.478, 0.360};
-    // class1.wrap_vertical = true;
-    // class1.wrap_reverse = true;
-    class1->size_max = (iVector2){800, 800};
+
+    state = UINewState();
+    
+    
     // class1.origin_p = UI_ORIGIN_CENTER;
     // class1.origin_p = UI_ORIGIN_SOUTHWEST;
     // class1.origin_p = UI_ORIGIN_SOUTHWEST;
     // UIElementAddClass(&root, &class1);
+    
+    
+    class1 = UINewClass(&state);
 
+    
+    class1->color = (Vector3){0.839, 0.478, 0.360};
+    // class1.wrap_vertical = true;
+    // class1.wrap_reverse = true;
+    class1->size_max = (iVector2){800, 800};
 
-    root = UINewElement();
-    UIElementAddClass(&root, *class1);
-    root.transform.x = 10;
-    root.transform.y = 100;
+    root = UINewElement(&state);
+    UIElementAddClass(root, class1);
+    root->transform.x = 10;
+    root->transform.y = 100;
 
-    UIElementAddChild(&root, UINewElement());
-    UIElementAddChild(&root, UINewElement());
-    UIElementAddChild(&root, UINewElement());
-    UIElementAddChild(&root, UINewElement());
+    UIElementAddChild(root, UINewElement(&state));
+    UIElementAddChild(root, UINewElement(&state));
+    UIElementAddChild(root, UINewElement(&state));
+    UIElementAddChild(root, UINewElement(&state));
 
-    UIElementAddChild(&root.children[0], UINewElement());
-    UIElementAddChild(&root.children[0], UINewElement());
+    UIElementAddChild(root->children[0], UINewElement(&state));
+    UIElementAddChild(root->children[0], UINewElement(&state));
 
-    UIElementAddChild(&root.children[1], UINewElement());
-    UIElementAddChild(&root.children[1], UINewElement());
+    UIElementAddChild(root->children[1], UINewElement(&state));
+    UIElementAddChild(root->children[1], UINewElement(&state));
 
+    #include<string.h>
+    root->children[3]->text = malloc(strlen("test\nyup") + 1);
+    // root->text = "test\nyup";
+    char text[10] = "test\ny3p";
+    strcpy(root->children[3]->text, text);
 
-    class2 = UINewClass();
-    class3 = UINewClass();
-    class4 = UINewClass();
+    class2 = UINewClass(&state);
+    class3 = UINewClass(&state);
+    class4 = UINewClass(&state);
+
     class4->color = (Vector3){1, 0, 0};
     class2->color = (Vector3){0.929, 0.443, 0.541};
     class2->size_max = (iVector2){700, 700};
     // UIClassSetEventClass(&class2, UI_MOUSE_ENTER | UI_MOUSE_HOVER, NULL, tmp);
     UIClassSetEventFunc(class2, tmp);
-    UIClassSetEventClass_hover(class2, *class4);
+    UIClassSetEventClass_hover(class2, class4);
 
     class3->color = (Vector3){0, 0.1, 0.541};
     class3->padding.x = 30;
     class3->padding.z = 50;
+    class3->wrap_vertical = true;
     // class2.origin_c = UI_ORIGIN_SOUTHWEST;
-    UIElementAddClass(&root.children[0], *class2);
+    UIElementAddClass(root->children[0], class2);
 
-    class2->wrap_vertical = true;
-    UIElementAddClass(&root.children[1], *class2);
-    UIElementAddClass(&root.children[1], *class3);
+    UIElementAddClass(root->children[1], class2);
+    UIElementAddClass(root->children[1], class3);
 
-    UIElementUpdateChildren(&root);
+    UIElementUpdateChildren(root);
 
 
     // WHEN COME BACK: 
     // * test out multiple classes on an element
     // * implement inherit class property (apprently this was already done)
     // * think about how we're going to do mouse interaction - mouse interaction mostly done (see TODOs)
-    // - look into how we are doing text rendering
+    // * look into how we are doing text rendering
     // - work on json UI file structure and parsing
     // - work on UI serialization to json
     // - get borders to render in the shader
@@ -113,7 +128,7 @@ void EngineSetup(){
 }
 
 void EngineExit(){
-    TextureFree(&texture);
+    // TextureFree(&texture);
     ShaderFree(&shader);
 }
 
@@ -127,13 +142,13 @@ void EngineLoop(){
     // }
     // UIRenderElement(&root);
 
-    UIElementUpdateChildren(&root);
+    UIElementUpdateChildren(root);
 
 
-    UIInteractGetEvent(&root);
+    UIInteractGetEvent(root);
 
 
-    UIRenderSubElements(&root);
+    UIRenderSubElements(root);
     // UIRenderSubElements(&root.children[0]);
     // UIRenderSubElements(&e2);
 

@@ -9,49 +9,50 @@
 extern UIClass UIElementDefaultClass();
 
 void UIElementApplyClass(UIElement *element, UIClass *class){
-	// Individually apply each bit of the class if it has been defined
+	if((element != NULL) && (class != NULL)){
+		// Individually apply each bit of the class if it has been defined
 
-	(class->offset.x == 2147483647) ? true : (element->style.offset.x = class->offset.x);
-	(class->offset.y == 2147483647) ? true : (element->style.offset.y = class->offset.y);
+		(class->offset.x == 2147483647) ? true : (element->style.offset.x = class->offset.x);
+		(class->offset.y == 2147483647) ? true : (element->style.offset.y = class->offset.y);
 
-	(class->size_min.x == -1) ? true : (element->style.size_min.x = class->size_min.x);
-	(class->size_min.y == -1) ? true : (element->style.size_min.y = class->size_min.y);
-	
-	(class->size_max.x == -1) ? true : (element->style.size_max.x = class->size_max.x);
-	(class->size_max.y == -1) ? true : (element->style.size_max.y = class->size_max.y);
+		(class->size_min.x == -1) ? true : (element->style.size_min.x = class->size_min.x);
+		(class->size_min.y == -1) ? true : (element->style.size_min.y = class->size_min.y);
+		
+		(class->size_max.x == -1) ? true : (element->style.size_max.x = class->size_max.x);
+		(class->size_max.y == -1) ? true : (element->style.size_max.y = class->size_max.y);
 
-	// Padding
-	(class->padding.x == -1) ? true : (element->style.padding.x = class->padding.x);
-	(class->padding.y == -1) ? true : (element->style.padding.y = class->padding.y);
-	(class->padding.z == -1) ? true : (element->style.padding.z = class->padding.z);
-	(class->padding.w == -1) ? true : (element->style.padding.w = class->padding.w);
+		// Padding
+		(class->padding.x == -1) ? true : (element->style.padding.x = class->padding.x);
+		(class->padding.y == -1) ? true : (element->style.padding.y = class->padding.y);
+		(class->padding.z == -1) ? true : (element->style.padding.z = class->padding.z);
+		(class->padding.w == -1) ? true : (element->style.padding.w = class->padding.w);
 
-	// Border
-	(class->border.x == -1) ? true : (element->style.border.x = class->border.x);
-	(class->border.y == -1) ? true : (element->style.border.y = class->border.y);
-	(class->border.z == -1) ? true : (element->style.border.z = class->border.z);
-	(class->border.w == -1) ? true : (element->style.border.w = class->border.w);
+		// Border
+		(class->border.x == -1) ? true : (element->style.border.x = class->border.x);
+		(class->border.y == -1) ? true : (element->style.border.y = class->border.y);
+		(class->border.z == -1) ? true : (element->style.border.z = class->border.z);
+		(class->border.w == -1) ? true : (element->style.border.w = class->border.w);
 
-	// Margin
-	(class->margin.x == -1) ? true : (element->style.margin.x = class->margin.x);
-	(class->margin.y == -1) ? true : (element->style.margin.y = class->margin.y);
-	(class->margin.z == -1) ? true : (element->style.margin.z = class->margin.z);
-	(class->margin.w == -1) ? true : (element->style.margin.w = class->margin.w);
+		// Margin
+		(class->margin.x == -1) ? true : (element->style.margin.x = class->margin.x);
+		(class->margin.y == -1) ? true : (element->style.margin.y = class->margin.y);
+		(class->margin.z == -1) ? true : (element->style.margin.z = class->margin.z);
+		(class->margin.w == -1) ? true : (element->style.margin.w = class->margin.w);
 
-	// Color
-	(class->color.x == -1) ? true : (element->style.color.x = class->color.x);
-	(class->color.y == -1) ? true : (element->style.color.y = class->color.y);
-	(class->color.z == -1) ? true : (element->style.color.z = class->color.z);
-	
-	// Wrap
-	(class->wrap == -1) ? true : (element->style.wrap = class->wrap);
-	(class->wrap_vertical == -1) ? true : (element->style.wrap_vertical = class->wrap_vertical);
-	(class->wrap_reverse == -1) ? true : (element->style.wrap_reverse = class->wrap_reverse);
+		// Color
+		(class->color.x == -1) ? true : (element->style.color.x = class->color.x);
+		(class->color.y == -1) ? true : (element->style.color.y = class->color.y);
+		(class->color.z == -1) ? true : (element->style.color.z = class->color.z);
+		
+		// Wrap
+		(class->wrap == -1) ? true : (element->style.wrap = class->wrap);
+		(class->wrap_vertical == -1) ? true : (element->style.wrap_vertical = class->wrap_vertical);
+		(class->wrap_reverse == -1) ? true : (element->style.wrap_reverse = class->wrap_reverse);
 
-	// Origins
-	(class->origin_c == UI_ORIGIN_UNDEFINED) ? true : (element->style.origin_c = class->origin_c);
-	(class->origin_p == UI_ORIGIN_UNDEFINED) ? true : (element->style.origin_p = class->origin_p);
-
+		// Origins
+		(class->origin_c == UI_ORIGIN_UNDEFINED) ? true : (element->style.origin_c = class->origin_c);
+		(class->origin_p == UI_ORIGIN_UNDEFINED) ? true : (element->style.origin_p = class->origin_p);
+	}
 }
 
 iVector2 UIElementCalculateOriginP(UIElement *element){
@@ -203,7 +204,7 @@ void UIElementUpdatePosition(UIElement *element){
 		}else{
 			offset = UIElementCalculateOriginP(element->parent);
 
-			if(&(element->parent->children[0]) == element){
+			if(element->parent->children[0] == element){
 
 				// This is the first element, so we take into account 
 				// both x and y origin shifting
@@ -216,7 +217,7 @@ void UIElementUpdatePosition(UIElement *element){
 				// When there are existing siblings, we must find the last sibling
 				// and position relative to that
 				int i = 0;
-				for(; (&(element->parent->children[i + 1]) != element); i++);
+				for(; (element->parent->children[i + 1] != element); i++);
 				// I'th element is now the element right before 'element'
 				
 				if(element->parent->style.wrap_vertical == false){
@@ -226,17 +227,17 @@ void UIElementUpdatePosition(UIElement *element){
 						// REVERSE
 
 						offset.x = 
-							element->parent->children[i].transform.x - 
-							element->parent->children[i].style.margin.x - 
+							element->parent->children[i]->transform.x - 
+							element->parent->children[i]->style.margin.x - 
 							element->style.margin.z - 
 							element->transform.z;
 					}else{
 						// FORWARD
 
 						offset.x = 
-							element->parent->children[i].transform.x + 
-							element->parent->children[i].transform.z + 
-							element->parent->children[i].style.margin.z + 
+							element->parent->children[i]->transform.x + 
+							element->parent->children[i]->transform.z + 
+							element->parent->children[i]->style.margin.z + 
 							element->style.margin.x;
 					}
 					offset.y += UIElementCalculateOriginC(element).y;
@@ -247,17 +248,17 @@ void UIElementUpdatePosition(UIElement *element){
 						// REVERSE
 
 						offset.y = 
-							element->parent->children[i].transform.y - 
-							element->parent->children[i].style.margin.y -
+							element->parent->children[i]->transform.y - 
+							element->parent->children[i]->style.margin.y -
 							element->style.margin.w - 
 							element->transform.w;
 					}else{
 						// FORWARD
 
 						offset.y = 
-							element->parent->children[i].transform.y + 
-							element->parent->children[i].transform.w + 
-							element->parent->children[i].style.margin.w + 
+							element->parent->children[i]->transform.y + 
+							element->parent->children[i]->transform.w + 
+							element->parent->children[i]->style.margin.w + 
 							element->style.margin.y;
 					}
 
@@ -283,18 +284,18 @@ void UIElementUpdateSize(UIElement *element){
 		// Look at parent for inherited classes
 		if(element->parent != NULL){
 			for(int i = 0; i < element->parent->num_classes; i++){
-				if(element->parent->classes[i].inherit){
-					UIElementApplyClass(element, &element->parent->classes[i]);
+				if(element->parent->classes[i]->inherit){
+					UIElementApplyClass(element, element->parent->classes[i]);
 				}
 			}
 		}
 
 		// Look at element's own classes for other modification
 		for(int i = 0; i < element->num_classes; i++){
-			UIElementApplyClass(element, &element->classes[i]);
+			UIElementApplyClass(element, element->classes[i]);
 		}
 		for(int i = 0; i < element->num_tmp_classes; i++){
-			UIElementApplyClass(element, &element->tmp_classes[i]);
+			UIElementApplyClass(element, element->tmp_classes[i]);
 		}
 		element->num_tmp_classes = 0;
 		free(element->tmp_classes);
@@ -311,14 +312,14 @@ void UIElementUpdateSize(UIElement *element){
 				int sum = 0;
 
 				// Child size
-				element->transform.w += element->children[i].transform.w;
-				sum += element->children[i].transform.z;
+				element->transform.w += element->children[i]->transform.w;
+				sum += element->children[i]->transform.z;
 
 				// Child margin
-				element->transform.w += element->children[i].style.margin.y;
-				element->transform.w += element->children[i].style.margin.w;
-				sum += element->children[i].style.margin.x;
-				sum += element->children[i].style.margin.z;
+				element->transform.w += element->children[i]->style.margin.y;
+				element->transform.w += element->children[i]->style.margin.w;
+				sum += element->children[i]->style.margin.x;
+				sum += element->children[i]->style.margin.z;
 
 				if(sum > widest){
 					widest = sum;
@@ -334,14 +335,14 @@ void UIElementUpdateSize(UIElement *element){
 				int sum = 0;
 
 				// Child size
-				element->transform.z += element->children[i].transform.z;
-				sum += element->children[i].transform.w;
+				element->transform.z += element->children[i]->transform.z;
+				sum += element->children[i]->transform.w;
 
 				// Child margin
-				element->transform.z += element->children[i].style.margin.x;
-				element->transform.z += element->children[i].style.margin.z;
-				sum += element->children[i].style.margin.y;
-				sum += element->children[i].style.margin.w;
+				element->transform.z += element->children[i]->style.margin.x;
+				element->transform.z += element->children[i]->style.margin.z;
+				sum += element->children[i]->style.margin.y;
+				sum += element->children[i]->style.margin.w;
 
 				if(sum > tallest){
 					tallest = sum;
@@ -393,7 +394,7 @@ void UIElementUpdateChildren(UIElement *element){
 				num_children += children[i]->num_children;
 
 				for(int k = 0; k < children[i]->num_children; k++){
-					children[num_children - children[i]->num_children + k] = &children[i]->children[k];
+					children[num_children - children[i]->num_children + k] = children[i]->children[k];
 				}
 				children[num_children] = NULL;
 			}

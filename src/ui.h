@@ -137,8 +137,10 @@ typedef struct UIClass{
 	bool inherit;
 
 	/** MOUSE EVENTS **/
-	int class_hold_id;
-	int class_hover_id;
+	// int class_hold_id;
+	// int class_hover_id;
+	struct UIClass *class_hold;
+	struct UIClass *class_hover;
 
 	UIMouseEventFunc_c event_func;
 
@@ -147,17 +149,19 @@ typedef struct UIClass{
 
 typedef struct UIElement{
 	int id;
+	
+	char *text;
 
 	struct UIElement *parent;
-	struct UIElement *children;
+	struct UIElement **children;
 	unsigned int num_children;
 
-	UIClass *classes;
+	UIClass **classes;
 	unsigned int num_classes;
 
 	// Array of classes which gets emptied when they are applied 
 	// to the elmeent
-	UIClass *tmp_classes;
+	UIClass **tmp_classes;
 	unsigned int num_tmp_classes;
 
 	// Final absolute positioning and scale
@@ -175,26 +179,44 @@ typedef struct UIElement{
 
 }UIElement;
 
+#define UI_STATE_MAX_CLASSES 1024
+#define UI_STATE_MAX_ELEMENTS 1024
+typedef struct UIState{
+	// Element 0 is the root element that is automatically set 
+	// when initializing a UIState
+	
+	UIElement elements[UI_STATE_MAX_ELEMENTS];
+	unsigned int num_elements;
+	
+	UIClass classes[UI_STATE_MAX_CLASSES];
+	unsigned int num_classes;
+
+	
+
+
+}UIState;
+
 /**
  * LAYOUT STUFFS
 */
+UIState UINewState();
+UIElement *UINewElement(UIState *state);
+void UIElementAddChild(UIElement *parent, UIElement *child);
 
-UIElement UINewElement();
-UIElement *UIElementAddChild(UIElement *parent, UIElement child);
+// void UIFreeElement(UIElement *element);
+void UIFreeState(UIState *state);
 
-void UIFreeElement(UIElement *element);
-
-void UIElementAddClass(UIElement *element, UIClass class);
-void UIElementAddTmpClass(UIElement *element, UIClass class);
+void UIElementAddClass(UIElement *element, UIClass *class);
+void UIElementAddTmpClass(UIElement *element, UIClass *class);
 
 void UIElementUpdateChildren(UIElement *element);
 
 
-UIClass *UINewClass();
+UIClass *UINewClass(UIState *state);
 
-UIClass *UIElementFindClass(UIElement *element, int class_id);
-UIElement *UIFindElement(UIElement *root, int element_id);
-UIClass *UIFindClass(int class_id);
+// UIClass *UIElementFindClass(UIElement *element, int class_id);
+// UIElement *UIFindElement(UIElement *root, int element_id);
+// UIClass *UIFindClass(int class_id);
 
 
 /**
@@ -211,7 +233,7 @@ void UIRenderSubElements(UIElement *element);
 
 void UIInteractGetEvent(UIElement *element);
 void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func);
-void UIClassSetEventClass_hold(UIClass *class, UIClass event_class);
-void UIClassSetEventClass_hover(UIClass *class, UIClass event_class);
+void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class);
+void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class);
 
 #endif

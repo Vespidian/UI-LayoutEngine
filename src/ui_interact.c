@@ -36,7 +36,7 @@ void UIInteractGetEvent(UIElement *element){
 				children = realloc(children, sizeof(UIElement) * (num_children + 1));
 
 				for(int k = 0; k < children[i]->num_children; k++){
-					children[num_children - children[i]->num_children + k] = &children[i]->children[k];
+					children[num_children - children[i]->num_children + k] = children[i]->children[k];
 				}
 				children[num_children] = NULL;
 			}   
@@ -98,19 +98,21 @@ void UIInteractGetEvent(UIElement *element){
 			for(int i = 0; i < mouse_element->num_classes; i++){
 
 				if((event_type & UI_MOUSE_HOLD) != 0){
-					if(mouse_element->classes[i].class_hold_id != -1){
-						UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hold_id));
+					if(mouse_element->classes[i]->class_hold != NULL){
+						// UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hold_id));
+						UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hold);
 					}
 				}
 				
 				if((event_type & UI_MOUSE_HOVER) != 0){
-					if(mouse_element->classes[i].class_hover_id != -1){
-						UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hover_id));
+					if(mouse_element->classes[i]->class_hover != NULL){
+						// UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hover_id));
+						UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hover);
 					}
 				}
 
-				if(mouse_element->classes[i].event_func != NULL){
-					mouse_element->classes[i].event_func(mouse_element, event_type);
+				if(mouse_element->classes[i]->event_func != NULL){
+					mouse_element->classes[i]->event_func(mouse_element, event_type);
 				}
 
 			}
@@ -124,14 +126,14 @@ void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func){
 	}
 }
 
-void UIClassSetEventClass_hold(UIClass *class, UIClass event_class){
+void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class){
 	if(class != NULL){
-		class->class_hold_id = event_class.id;
+		class->class_hold = event_class;
 	}
 }
 
-void UIClassSetEventClass_hover(UIClass *class, UIClass event_class){
+void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class){
 	if(class != NULL){
-		class->class_hover_id = event_class.id;
+		class->class_hover = event_class;
 	}
 }
