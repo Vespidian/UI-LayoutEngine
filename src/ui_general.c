@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "vectorlib.h"
 #include "debug.h"
@@ -19,6 +20,7 @@ UIClass *UINewClass(UIState *state){
 		c = &state->classes[state->num_classes];
 
 		c->id = state->num_classes++;
+		c->name = NULL;
 		c->offset = (iVector2){2147483647, 2147483647};
 
 		c->size_min = (iVector2){-1, -1};
@@ -54,6 +56,7 @@ UIClass UIElementDefaultClass(){
 	UIClass c;
 
 	c.id = -1;
+	c.name = NULL;
 	c.offset = (iVector2){0, 0};
 
 	c.size_min = (iVector2){100, 100};
@@ -90,6 +93,7 @@ UIElement *UINewElement(UIState *state){
 
 		e->id = state->num_elements++;
 
+		e->name = NULL;
 		e->text = NULL;
 
 		e->num_children = 0;
@@ -116,6 +120,12 @@ UIElement *UINewElement(UIState *state){
 
 
 static void UIFreeElement(UIElement *element){
+	free(element->name);
+	element->name = NULL;
+	
+	free(element->text);
+	element->text = NULL;
+
 	free(element->children);
 	element->children = NULL;
 	element->num_children = 0;
@@ -135,6 +145,10 @@ void UIFreeState(UIState *state){
 			UIFreeElement(&state->elements[i]);
 		}
 		state->num_elements = 0;
+
+		for(int i = 0; i < state->num_classes; i++){
+			free(state->classes[i].name);
+		}
 		state->num_classes = 0;
 	}
 }
@@ -195,13 +209,18 @@ void UIElementAddTmpClass(UIElement *element, UIClass *class){
 // 	return class;
 // }
 
-// UIClass *UIFindClass(UIState state, int class_id){
-//     UIClass *c = NULL;
-//     if(class_id >= 0){
-//         c = &state.classes[class_id];
-//     }
-//     return c;
-// }
+UIClass *UIFindClass(UIState *state, char *name){
+    UIClass *c = &state->classes[0];
+	if(name != NULL){
+		for(int i = 0; i < state->num_classes; i++){
+			if(strcmp(name, state->classes[i].name) == 0){
+				c = &state->classes[i];
+				break;
+			}
+		}
+	}
+	return c;
+}
 
 // UIElement *UIFindElement(UIElement *root, int element_id){
 // 	UIElement *element = NULL;

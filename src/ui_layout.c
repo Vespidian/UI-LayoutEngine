@@ -6,6 +6,9 @@
 #include "debug.h"
 #include "ui.h"
 
+unsigned int UI_WINDOW_WIDTH = 100;
+unsigned int UI_WINDOW_HEIGHT = 100;
+
 extern UIClass UIElementDefaultClass();
 
 void UIElementApplyClass(UIElement *element, UIClass *class){
@@ -364,6 +367,11 @@ void UIElementUpdateSize(UIElement *element){
 			element->transform.w = element->style.size_max.y;
 		}else if(element->transform.w < element->style.size_min.y){
 			element->transform.w = element->style.size_min.y;
+		}
+
+		if(element->parent == NULL){
+			element->transform.z = UI_WINDOW_WIDTH;
+			element->transform.w = UI_WINDOW_HEIGHT;
 		}
 
 	}

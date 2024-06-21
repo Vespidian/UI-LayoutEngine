@@ -1,0 +1,30 @@
+{
+	classes: {
+		"root": {
+			margin: 20,
+			max-width: 500,
+		},
+		"changed": {
+			color: #e2e2e2,
+		},
+	},
+	elements: [
+		{
+			name: "menu",
+			class: "root",
+			children: [
+				{
+					name: "a1",
+					class: "changed",
+				},
+				{
+					name: "b1",
+					class: "changed",
+				},
+			],
+		},
+		{
+			name: "hehe",
+		},
+	],
+},

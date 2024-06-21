@@ -10,7 +10,7 @@
 extern Texture texture;
 
 void UIRenderElement(UIElement *element){
-    if(element != NULL){
+    if(element != NULL && element->parent != NULL){
         Vector4 r = {
             element->transform.x,
             element->transform.y,

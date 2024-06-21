@@ -90,6 +90,7 @@ typedef void (*UIMouseEventFunc_c)(UIElement *element, UI_MOUSE_EVENT events);
 
 typedef struct UIClass{
 	int id;
+	char *name;
 
 	UI_SCALE_TYPE scale_type;
 
@@ -150,6 +151,7 @@ typedef struct UIClass{
 typedef struct UIElement{
 	int id;
 	
+	char *name;
 	char *text;
 
 	struct UIElement *parent;
@@ -199,6 +201,9 @@ typedef struct UIState{
 /**
  * LAYOUT STUFFS
 */
+extern unsigned int UI_WINDOW_WIDTH;
+extern unsigned int UI_WINDOW_HEIGHT;
+
 UIState UINewState();
 UIElement *UINewElement(UIState *state);
 void UIElementAddChild(UIElement *parent, UIElement *child);
@@ -216,7 +221,7 @@ UIClass *UINewClass(UIState *state);
 
 // UIClass *UIElementFindClass(UIElement *element, int class_id);
 // UIElement *UIFindElement(UIElement *root, int element_id);
-// UIClass *UIFindClass(int class_id);
+UIClass *UIFindClass(UIState *state, char *name);
 
 
 /**
@@ -235,5 +240,7 @@ void UIInteractGetEvent(UIElement *element);
 void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func);
 void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class);
 void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class);
+
+UIState UIParse(char *path);
 
 #endif
