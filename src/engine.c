@@ -143,7 +143,7 @@ void EngineLoop(){
     UIElementUpdateChildren(&state.elements[0]);
 
 
-    UIInteractGetEvent(&state.elements[0]);
+    UIInteractGetEvent(&state);
 
 
     UIRenderSubElements(&state.elements[0]);

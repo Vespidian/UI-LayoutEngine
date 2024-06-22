@@ -148,6 +148,8 @@ void UIFreeState(UIState *state){
 
 		for(int i = 0; i < state->num_classes; i++){
 			free(state->classes[i].name);
+			free(state->classes[i].class_hold);
+			free(state->classes[i].class_hover);
 		}
 		state->num_classes = 0;
 	}

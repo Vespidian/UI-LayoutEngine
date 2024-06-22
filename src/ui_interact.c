@@ -12,10 +12,11 @@
 
 // Returns a pointer to the element that was interacted with
 // also sets the event_type variable to the events currently happening
-void UIInteractGetEvent(UIElement *element){
+void UIInteractGetEvent(UIState *state){
 	UIElement *mouse_element = NULL;
 
-	if(element != NULL){
+	if(state != NULL){
+		UIElement *element = &state->elements[0];
 		UI_MOUSE_EVENT event_type = 0;
 
 		// Initially we create an array of all children
@@ -99,15 +100,15 @@ void UIInteractGetEvent(UIElement *element){
 
 				if((event_type & UI_MOUSE_HOLD) != 0){
 					if(mouse_element->classes[i]->class_hold != NULL){
-						// UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hold_id));
-						UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hold);
+						// UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hold);
+						UIElementAddTmpClass(mouse_element, UIFindClass(state, mouse_element->classes[i]->class_hold));
 					}
 				}
 				
 				if((event_type & UI_MOUSE_HOVER) != 0){
 					if(mouse_element->classes[i]->class_hover != NULL){
-						// UIElementAddTmpClass(mouse_element, *UIFindClass(mouse_element->classes[i].class_hover_id));
-						UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hover);
+						// UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hover);
+						UIElementAddTmpClass(mouse_element, UIFindClass(state, mouse_element->classes[i]->class_hover));
 					}
 				}
 
@@ -128,12 +129,16 @@ void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func){
 
 void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class){
 	if(class != NULL){
-		class->class_hold = event_class;
+		// class->class_hold = event_class;
+		free(class->class_hold);
+		class->class_hold = malloc(sizeof(char) * strlen(event_class->name));
 	}
 }
 
 void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class){
 	if(class != NULL){
-		class->class_hover = event_class;
+		// class->class_hover = event_class;
+		free(class->class_hover);
+		class->class_hover = malloc(sizeof(char) * strlen(event_class->name));
 	}
 }

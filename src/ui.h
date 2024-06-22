@@ -140,8 +140,10 @@ typedef struct UIClass{
 	/** MOUSE EVENTS **/
 	// int class_hold_id;
 	// int class_hover_id;
-	struct UIClass *class_hold;
-	struct UIClass *class_hover;
+	// struct UIClass *class_hold;
+	// struct UIClass *class_hover;
+	char *class_hold;
+	char *class_hover;
 
 	UIMouseEventFunc_c event_func;
 
@@ -236,7 +238,7 @@ void UIRenderSubElements(UIElement *element);
  * INTERACT STUFFS
 */
 
-void UIInteractGetEvent(UIElement *element);
+void UIInteractGetEvent(UIState *state);
 void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func);
 void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class);
 void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class);
