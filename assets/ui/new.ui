@@ -6,7 +6,7 @@
 		},
 		"extra": {
 			color: #ff0000,
-			margin-left: 30,
+			padding-left: 30,
 		}
 		"changed": {
 			color: #e2e2e2,

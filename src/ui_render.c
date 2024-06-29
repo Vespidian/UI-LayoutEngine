@@ -1,31 +1,90 @@
+#include <string.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <GL/glew.h>
 
 #include "textures.h"
 #include "vectorlib.h"
-#include "renderer/quad.h"
+#include "shader.h"
+#include "renderer/renderer.h"
 #include "render_text.h"
 
 #include "ui.h"
 
 extern Texture texture;
 
+Shader ui_shader;
+
+AttribArray ui_vao;
+GLTF ui_gltf;
+Mesh ui_mesh;
+
+static void InitUIGL(){
+    ui_gltf = GLTFOpen("../assets/models/plane.gltf");
+	ui_mesh = ui_gltf.meshes[0];
+
+	if(!ui_mesh.gl_data.is_loaded){
+		// set up 'model.renderer' (vao and vbo)
+		glGenVertexArrays(1, &ui_mesh.gl_data.vao);
+		glBindVertexArray(ui_mesh.gl_data.vao);
+
+		glGenBuffers(1, &ui_mesh.gl_data.pos_vbo);
+		glGenBuffers(1, &ui_mesh.gl_data.ebo);
+
+		// Position
+		if(ui_mesh.position_exists){
+			glBindBuffer(GL_ARRAY_BUFFER, ui_mesh.gl_data.pos_vbo);
+			glBufferData(GL_ARRAY_BUFFER, ui_mesh.position_bytelength, ui_mesh.data + ui_mesh.position_offset, GL_STATIC_DRAW);
+			// glEnableVertexAttribArray(0);
+			glEnableVertexArrayAttrib(ui_mesh.gl_data.vao, 0);
+			glVertexAttribPointer(0, ui_mesh.position_size, ui_mesh.position_gl_type, GL_FALSE, 0, (void*)(0));
+		}
+
+		if(ui_mesh.index_exists){
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ui_mesh.gl_data.ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, ui_mesh.index_bytelength, ui_mesh.data + ui_mesh.index_offset, GL_STATIC_DRAW);
+		}
+
+		ui_mesh.gl_data.is_loaded = true;
+	}
+
+	ui_vao = NewVAO(ui_mesh.gl_data.vao, 1, 6, ATTR_VEC3, ATTR_VEC2, ATTR_VEC3, ATTR_VEC3, ATTR_VEC4, ATTR_VEC4);
+}
+
+void InitUIRender(){
+    InitUIGL();
+
+    ui_shader = ShaderOpen("../assets/shaders/ui.shader");
+    ShaderUniformSetSampler2D(&ui_shader, "src_texture", 0);
+	ShaderUniformSetMat4(&ui_shader, "tex_coordinates", default_texture_coordinates);
+
+    ShaderUniformSetMat4(&ui_shader, "projection", orthographic_projection);
+
+}
+
 void UIRenderElement(UIElement *element){
     if(element != NULL && element->parent != NULL){
-        Vector4 r = {
+        Vector3 r = {
             element->transform.x,
             element->transform.y,
+            1
+        };
+        Vector2 scale = {
             element->transform.z,
             element->transform.w
         };
 
-        Vector4 color = {
-            element->style.color.x,
-            element->style.color.y,
-            element->style.color.z,
-            1
-        };
+        float data[64];
+    	memcpy(&data[0], r.v, sizeof(Vector3));
+    	memcpy(&data[3], scale.v, sizeof(Vector2));
+    	memcpy(&data[5], element->style.color.v, sizeof(Vector3));
+    	memcpy(&data[8], element->style.border_color.v, sizeof(Vector3));
+    	memcpy(&data[11], element->style.border.v, sizeof(Vector4));
 
-        RenderQuad(texture, NULL, &r, 0, color, 0);
+    	Texture texture_array[16] = {texture};
+
+    	AppendInstance(ui_vao, data, ui_mesh, &ui_shader, 1, texture_array);
+
         if(element->text != NULL){
             RenderText(
                 &default_font, 
@@ -40,8 +99,10 @@ void UIRenderElement(UIElement *element){
     }
 }
 
-void UIRenderSubElements(UIElement *element){
-    if(element != NULL){
+// void UIRenderSubElements(UIElement *element){
+void UIRender(UIState *state){
+    if(state != NULL){
+        UIElement *element = &state->elements[0];
         // Initially we create an array of all children
         UIElement **children;
         unsigned int num_children = 1;

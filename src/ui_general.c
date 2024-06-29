@@ -14,37 +14,45 @@ UIState UINewState(){
 	return state;
 }
 
+UIClass UIDefaultClass(){
+	UIClass c;
+
+	c.id = -1;
+	c.name = NULL;
+	c.offset = (iVector2){2147483647, 2147483647};
+
+	c.size_min = (iVector2){-1, -1};
+	c.size_max = (iVector2){-1, -1};
+
+	c.padding = (iVector4){-1, -1, -1, -1};
+	c.border = (iVector4){-1, -1, -1, -1};
+	c.margin = (iVector4){-1, -1, -1, -1};
+	c.color = (Vector3){-1, -1, -1};
+
+	c.wrap = -1;
+	c.wrap_vertical = -1;
+	c.wrap_reverse = -1;
+	c.origin_p = UI_ORIGIN_UNDEFINED;
+	c.origin_c = UI_ORIGIN_UNDEFINED;
+
+	c.culling = -1;
+	c.inherit = false;
+
+	/** Mouse Events **/
+	c.class_hold = NULL;
+	c.class_hover = NULL;
+
+	c.event_func = NULL;
+
+	return c;
+}
+
 UIClass *UINewClass(UIState *state){
 	UIClass *c = &state->classes[0];
 	if((state != NULL) && (state->num_classes < UI_STATE_MAX_CLASSES)){
 		c = &state->classes[state->num_classes];
-
+		*c = UIDefaultClass();
 		c->id = state->num_classes++;
-		c->name = NULL;
-		c->offset = (iVector2){2147483647, 2147483647};
-
-		c->size_min = (iVector2){-1, -1};
-		c->size_max = (iVector2){-1, -1};
-
-		c->padding = (iVector4){-1, -1, -1, -1};
-		c->border = (iVector4){-1, -1, -1, -1};
-		c->margin = (iVector4){-1, -1, -1, -1};
-		c->color = (Vector3){-1, -1, -1};
-
-		c->wrap = -1;
-		c->wrap_vertical = -1;
-		c->wrap_reverse = -1;
-		c->origin_p = UI_ORIGIN_UNDEFINED;
-		c->origin_c = UI_ORIGIN_UNDEFINED;
-
-		c->culling = -1;
-		c->inherit = false;
-
-		/** Mouse Events **/
-		c->class_hold = NULL;
-		c->class_hover = NULL;
-
-		c->event_func = NULL;
 	}else{
 		DebugLog(D_ERR, "%s:%s: error: Could not create new class: UI_STATE_MAX_CLASSES reached", __FILE__, __LINE__);
 	}
@@ -106,8 +114,11 @@ UIElement *UINewElement(UIState *state){
 		e->tmp_classes = NULL;
 
 		e->transform = (iVector4){0, 0, 100, 100};
+		e->offset = (iVector4){0, 0, 0, 0};
 		e->mouse_events = 0;
+		e->class = UIDefaultClass();
 		e->style = UIElementDefaultClass();
+		e->event_func = NULL;
 
 		e->parent = NULL;
 	}else{
@@ -198,24 +209,11 @@ void UIElementAddTmpClass(UIElement *element, UIClass *class){
 	}
 }
 
-// UIClass *UIElementFindClass(UIElement *element, int class_id){
-// 	UIClass *class = NULL;
-// 	if(element != NULL){
-// 		for(int i = 0; i < element->num_classes; i++){
-// 			if(element->classes[i].id == class_id){
-// 				class = &element->classes[i];
-// 			}
-// 		}
-// 	}
-
-// 	return class;
-// }
-
 UIClass *UIFindClass(UIState *state, char *name){
-    UIClass *c = &state->classes[0];
-	if(name != NULL){
+    UIClass *c = NULL;
+	if((state != NULL) && (name != NULL)){
 		for(int i = 0; i < state->num_classes; i++){
-			if(strcmp(name, state->classes[i].name) == 0){
+			if((state->classes[i].name != NULL) && (strcmp(name, state->classes[i].name) == 0)){
 				c = &state->classes[i];
 				break;
 			}
@@ -224,38 +222,15 @@ UIClass *UIFindClass(UIState *state, char *name){
 	return c;
 }
 
-// UIElement *UIFindElement(UIElement *root, int element_id){
-// 	UIElement *element = NULL;
-// 	if(root != NULL){
-// 		// Initially we create an array of all children
-// 		UIElement **children;
-// 		unsigned int num_children = 1;
-// 		children = malloc(sizeof(UIElement) * (num_children + 1));
-// 		children[0] = root;
-// 		children[num_children + 1] = NULL;
-
-// 		// if(children[0]->num_children != 0){
-// 			for(int i = 0; children[i] != NULL; i++){
-// 				if(children[i]->id == element_id){
-// 					element = children[i];
-// 				}
-// 				if(children[i]->num_children == 0){
-// 					continue;
-// 				}
-
-// 				UIElement **tmp = realloc(children, sizeof(UIElement *) * (num_children + children[i]->num_children + 1));
-// 				if(tmp != NULL){
-// 					children = tmp;
-// 					num_children += children[i]->num_children;
-
-// 					for(int k = 0; k < children[i]->num_children; k++){
-// 						children[num_children - children[i]->num_children + k] = &children[i]->children[k];
-// 					}
-// 				}
-
-// 			}
-// 		// }
-// 	}
-
-// 	return element;
-// }
+UIElement *UIFindElement(UIState *state, char *name){
+    UIElement *e = NULL;
+	if((state != NULL) && (name != NULL)){
+		for(int i = 0; i < state->num_elements; i++){
+			if((state->elements[i].name != NULL) && (strcmp(name, state->elements[i].name) == 0)){
+				e = &state->elements[i];
+				break;
+			}
+		}
+	}
+	return e;
+}

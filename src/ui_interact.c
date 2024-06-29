@@ -9,55 +9,57 @@
 #include "event.h"
 #include "ui.h"
 
-
-// Returns a pointer to the element that was interacted with
-// also sets the event_type variable to the events currently happening
-void UIInteractGetEvent(UIState *state){
+void UIInteract(UIState *state){
 	UIElement *mouse_element = NULL;
 
 	if(state != NULL){
-		UIElement *element = &state->elements[0];
 		UI_MOUSE_EVENT event_type = 0;
+		if(state->focused_element == NULL){
+			UIElement *element = &state->elements[0];
 
-		// Initially we create an array of all children
-		UIElement **children;
-		unsigned int num_children = 1;
-		children = malloc(sizeof(UIElement) * (num_children + 1));
-		children[0] = element;
-		children[num_children + 1] = NULL;
+			// Initially we create an array of all children
+			UIElement **children;
+			unsigned int num_children = 1;
+			children = malloc(sizeof(UIElement) * (num_children + 1));
+			children[0] = element;
+			children[num_children + 1] = NULL;
 
-		if(element->num_children != 0){
-			for(int i = 0; children[i] != NULL; i++){
+			if(element->num_children != 0){
+				for(int i = 0; children[i] != NULL; i++){
 
-				if(children[i]->num_children == 0){
-					continue;
-				}
+					if(children[i]->num_children == 0){
+						continue;
+					}
 
-				num_children += children[i]->num_children;
-				children = realloc(children, sizeof(UIElement) * (num_children + 1));
+					num_children += children[i]->num_children;
+					children = realloc(children, sizeof(UIElement) * (num_children + 1));
 
-				for(int k = 0; k < children[i]->num_children; k++){
-					children[num_children - children[i]->num_children + k] = children[i]->children[k];
-				}
-				children[num_children] = NULL;
-			}   
-		}
-
-		// Loop from leaves to root
-		// Find the first child-most element that contains the mouse
-		for(int i = (num_children - 1); i >= 0; i--){
-			if(
-				(mouse_pos.x > children[i]->transform.x) && 
-				(mouse_pos.x < (children[i]->transform.x + children[i]->transform.z)) &&
-				(mouse_pos.y > children[i]->transform.y) && 
-				(mouse_pos.y < (children[i]->transform.y + children[i]->transform.w)) &&
-				mouse_element == NULL
-			){
-				mouse_element = children[i];
-			}else{
-				children[i]->mouse_events &= ~UI_MOUSE_HOVER;
+					for(int k = 0; k < children[i]->num_children; k++){
+						children[num_children - children[i]->num_children + k] = children[i]->children[k];
+					}
+					children[num_children] = NULL;
+				}   
 			}
 
+			// Loop from leaves to root
+			// Find the first child-most element that contains the mouse
+			for(int i = (num_children - 1); i >= 1; i--){
+				if(
+					(mouse_pos.x > children[i]->transform.x) && 
+					(mouse_pos.x < (children[i]->transform.x + children[i]->transform.z)) &&
+					(mouse_pos.y > children[i]->transform.y) && 
+					(mouse_pos.y < (children[i]->transform.y + children[i]->transform.w)) &&
+					mouse_element == NULL
+				){
+					mouse_element = children[i];
+				}else{
+					children[i]->mouse_events &= ~UI_MOUSE_HOVER;
+				}
+
+			}
+		}else{
+			mouse_element = state->focused_element;
+			state->focused_element = NULL;
 		}
 
 		// Only test events if the mouse is hovering over an element
@@ -95,6 +97,10 @@ void UIInteractGetEvent(UIState *state){
 				mouse_element->mouse_events |= UI_MOUSE_CLICK;
 			}
 
+			if(mouse_element->event_func != NULL){
+				mouse_element->event_func(state, mouse_element, event_type);
+			}
+
 			// Run event functions and set event classes
 			for(int i = 0; i < mouse_element->num_classes; i++){
 
@@ -113,11 +119,31 @@ void UIInteractGetEvent(UIState *state){
 				}
 
 				if(mouse_element->classes[i]->event_func != NULL){
-					mouse_element->classes[i]->event_func(mouse_element, event_type);
+					mouse_element->classes[i]->event_func(state, mouse_element, event_type);
 				}
 
 			}
+
+			switch(mouse_element->input_type){
+				case UI_INPUT_NONE:
+				default:
+					break;
+				case UI_INPUT_BUTTON:
+					break;
+				case UI_INPUT_SLIDER:
+					mouse_element->slider.func(state, mouse_element, event_type);
+					break;
+				case UI_INPUT_CHECKBOX:
+					break;
+			}
+
 		}
+	}
+}
+
+void UIElementSetEventFunc(UIElement *element, UIMouseEventFunc_c event_func){
+	if(element != NULL){
+		element->event_func = event_func;
 	}
 }
 

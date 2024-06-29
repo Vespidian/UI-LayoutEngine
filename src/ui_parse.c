@@ -291,12 +291,12 @@ static void tfunc0_default(JSONState *json, unsigned int token){
 /* --- JSON ROOT - PARSING STARTS HERE --- */
 
 
-UIState UIParse(char *path){
-	UIState state = UINewState();
-	ui_state_ptr = &state;
+void UIParse(UIState *state, char *path){
+	*state = UINewState();
+	ui_state_ptr = state;
 
 	if(path != NULL){
-		element_ptr = UINewElement(&state);
+		element_ptr = UINewElement(state);
 		
 
 		JSONState json = JSONOpen(path);
@@ -312,6 +312,4 @@ UIState UIParse(char *path){
 	ui_state_ptr = NULL;
 	element_ptr = NULL;
 	class_ptr = NULL;
-
-	return state;
 }

@@ -270,8 +270,8 @@ void UIElementUpdatePosition(UIElement *element){
 			}
 		}
 		
-		element->transform.x = offset.x;
-		element->transform.y = offset.y;
+		element->transform.x = offset.x + element->offset.x;
+		element->transform.y = offset.y + element->offset.y;
 	}
 }
 
@@ -304,10 +304,24 @@ void UIElementUpdateSize(UIElement *element){
 		free(element->tmp_classes);
 		element->tmp_classes = NULL;
 
+		// And finally, apply the element's own class to itself
+		UIElementApplyClass(element, &element->class);
 
 		// Look at children for size and any stretching
-		element->transform.z = element->style.border.x + element->style.border.z + element->style.padding.x + element->style.padding.z;
-		element->transform.w = element->style.border.y + element->style.border.w + element->style.padding.y + element->style.padding.w;
+		element->transform.z = 
+			element->style.border.x + 
+			element->style.border.z + 
+			element->style.padding.x + 
+			element->style.padding.z + 
+			element->offset.z
+		;
+		element->transform.w = 
+			element->style.border.y + 
+			element->style.border.w + 
+			element->style.padding.y + 
+			element->style.padding.w + 
+			element->offset.w
+		;
 		if(element->style.wrap_vertical == true){
 			// VERTICAL
 			int widest = 0;
@@ -377,54 +391,57 @@ void UIElementUpdateSize(UIElement *element){
 	}
 }
 
-void UIElementUpdateChildren(UIElement *element){
-	// 1. iteratively creating an array of all nodes (elements)
-	// 2. Iterate through the array backwards, updating each element based on 
-	// the size of its immediate children and any classes inherited from 
-	// the parent element
+// void UIElementUpdateChildren(UIElement *element){
+void UIUpdate(UIState *state){
+	if(state != NULL){
+		// 1. iteratively creating an array of all nodes (elements)
+		// 2. Iterate through the array backwards, updating each element based on 
+		// the size of its immediate children and any classes inherited from 
+		// the parent element
 
-	// Initially we create an array of all children
-	UIElement **children;
-	unsigned int num_children = 1;
-	children = malloc(sizeof(UIElement) * (num_children + 1));
-	children[0] = element;
-	children[num_children + 1] = NULL;
+		// Initially we create an array of all children
+		UIElement *element = &state->elements[0];
+		UIElement **children;
+		unsigned int num_children = 1;
+		children = malloc(sizeof(UIElement) * (num_children + 1));
+		children[0] = element;
+		children[num_children + 1] = NULL;
 
-	if(children[0]->num_children != 0){
-		for(int i = 0; children[i] != NULL; i++){
-			if(children[i]->num_children == 0){
-				continue;
-			}
-
-			UIElement **tmp = realloc(children, sizeof(UIElement *) * (num_children + children[i]->num_children + 1));
-			if(tmp != NULL){
-				children = tmp;
-				num_children += children[i]->num_children;
-
-				for(int k = 0; k < children[i]->num_children; k++){
-					children[num_children - children[i]->num_children + k] = children[i]->children[k];
+		if(children[0]->num_children != 0){
+			for(int i = 0; children[i] != NULL; i++){
+				if(children[i]->num_children == 0){
+					continue;
 				}
-				children[num_children] = NULL;
+
+				UIElement **tmp = realloc(children, sizeof(UIElement *) * (num_children + children[i]->num_children + 1));
+				if(tmp != NULL){
+					children = tmp;
+					num_children += children[i]->num_children;
+
+					for(int k = 0; k < children[i]->num_children; k++){
+						children[num_children - children[i]->num_children + k] = children[i]->children[k];
+					}
+					children[num_children] = NULL;
+				}
+
 			}
-
 		}
+
+
+		// Loop from leaves to root, calculating the size of each element
+		for(int i = (num_children - 1); i >= 0; i--){
+			UIElementUpdateSize(children[i]);
+		}
+
+		for(int i = 0; i < num_children; i++){
+			UIElementUpdatePosition(children[i]);
+		}
+			
+
+
+		free(children);
+		children = NULL;
 	}
-
-
-	// Loop from leaves to root, calculating the size of each element
-	for(int i = (num_children - 1); i >= 0; i--){
-		UIElementUpdateSize(children[i]);
-	}
-
-	for(int i = 0; i < num_children; i++){
-		UIElementUpdatePosition(children[i]);
-	}
-		
-
-
-	free(children);
-	children = NULL;
-
 }
 
 void UIElementUpdateSiblings(UIElement *element){

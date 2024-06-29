@@ -33,6 +33,14 @@ typedef enum UI_MOUSE_EVENT{
 	UI_MOUSE_HOVER   = 1 << 5,
 }UI_MOUSE_EVENT;
 
+typedef enum UI_INPUT_TYPE{
+	UI_INPUT_NONE,
+	UI_INPUT_BUTTON,
+	UI_INPUT_SLIDER,
+	UI_INPUT_CHECKBOX,
+
+}UI_INPUT_TYPE;
+
 /**
  * IGNORES: (When elements of a class have these values, 
  * they are ignored and not passed to the element)
@@ -84,9 +92,27 @@ typedef enum UI_MOUSE_EVENT{
  * system of adding different class effects
 */
 typedef struct UIElement UIElement;
+typedef struct UIState UIState;
 
 typedef void (*UIMouseEventFunc)(UIElement *element);
-typedef void (*UIMouseEventFunc_c)(UIElement *element, UI_MOUSE_EVENT events);
+typedef void (*UIMouseEventFunc_c)(UIState *state, UIElement *element, UI_MOUSE_EVENT events);
+
+typedef struct UISlider{
+	float val;
+	float min;
+	float max;
+	float step;
+	UIMouseEventFunc_c func;
+
+	bool modify_width;
+}UISlider;
+
+typedef struct UIToggle{
+	bool state;
+	UIMouseEventFunc_c func;
+	struct UIClass *c1;
+	struct UIClass *c2;
+}UIToggle;
 
 typedef struct UIClass{
 	int id;
@@ -110,6 +136,7 @@ typedef struct UIClass{
 
 	// color
 	Vector3 color;
+	Vector3 border_color;
 
 	// Defines whether or not a child will be placed in the next 
 	// row or column when there is no more room in the current
@@ -170,8 +197,18 @@ typedef struct UIElement{
 
 	// Final absolute positioning and scale
 	iVector4 transform;
+	iVector4 offset;
 
 	UI_MOUSE_EVENT mouse_events;
+
+
+
+	UI_INPUT_TYPE input_type;
+	struct UISlider slider;
+
+
+	// The final class to be applied to the element
+	UIClass class;
 
 	// The conglomerate of all classes in the class array 
 	// (used for layout and rendering) (cannot be inherited)
@@ -179,6 +216,9 @@ typedef struct UIElement{
 	// This is a temporary class which is created from inherited 
 	// parent classes, and classes in the classes array
 	UIClass style;
+
+	UIMouseEventFunc_c event_func;
+
 
 
 }UIElement;
@@ -196,9 +236,11 @@ typedef struct UIState{
 	unsigned int num_classes;
 
 	
+	UIElement *focused_element;
 
 
 }UIState;
+
 
 /**
  * LAYOUT STUFFS
@@ -216,13 +258,13 @@ void UIFreeState(UIState *state);
 void UIElementAddClass(UIElement *element, UIClass *class);
 void UIElementAddTmpClass(UIElement *element, UIClass *class);
 
-void UIElementUpdateChildren(UIElement *element);
+// void UIElementUpdateChildren(UIElement *element);
+void UIUpdate(UIState *state);
 
 
 UIClass *UINewClass(UIState *state);
 
-// UIClass *UIElementFindClass(UIElement *element, int class_id);
-// UIElement *UIFindElement(UIElement *root, int element_id);
+UIElement *UIFindElement(UIState *state, char *name);
 UIClass *UIFindClass(UIState *state, char *name);
 
 
@@ -230,19 +272,22 @@ UIClass *UIFindClass(UIState *state, char *name);
  * RENDER STUFFS
 */
 
+void InitUIRender();
 void UIRenderElement(UIElement *element);
-void UIRenderSubElements(UIElement *element);
+void UIRender(UIState *state);
 
 
 /**
  * INTERACT STUFFS
 */
 
-void UIInteractGetEvent(UIState *state);
+void UIInteract(UIState *state);
 void UIClassSetEventFunc(UIClass *class, UIMouseEventFunc_c event_func);
 void UIClassSetEventClass_hold(UIClass *class, UIClass *event_class);
 void UIClassSetEventClass_hover(UIClass *class, UIClass *event_class);
 
-UIState UIParse(char *path);
+void UIParse(UIState *state, char *path);
+
+void UISliderNew(UIElement *element, float min, float max, float val_default, float step);
 
 #endif
