@@ -3,6 +3,10 @@
 		"root": {
 			margin: 20,
 			max-width: 500,
+			min-width: 900,
+			min-height: 100,
+			origin-p: right,
+			wrap-reverse: true,
 		},
 		"extra": {
 			color: #ff0000,
@@ -11,6 +15,7 @@
 		"changed": {
 			color: #e2e2e2,
 			on-hover: "extra",
+			origin-c: right,
 		},
 	},
 	elements: [
@@ -27,6 +32,12 @@
 				{
 					name: "b1",
 					class: "changed",
+					children: [
+						{
+							name: "idk",
+							class: "extra",
+						}
+					],
 				},
 			],
 		},

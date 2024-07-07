@@ -6,7 +6,7 @@
 
 #include "ui.h"
 
-bool hold = false;
+static bool hold = false;
 static iVector2 holdpos;
 static iVector2 diff;
 

@@ -26,8 +26,7 @@ void UIInteract(UIState *state){
 
 			if(element->num_children != 0){
 				for(int i = 0; children[i] != NULL; i++){
-
-					if(children[i]->num_children == 0){
+					if((children[i]->num_children == 0) || (children[i]->visible_children == false)){
 						continue;
 					}
 
@@ -45,6 +44,7 @@ void UIInteract(UIState *state){
 			// Find the first child-most element that contains the mouse
 			for(int i = (num_children - 1); i >= 1; i--){
 				if(
+					children[i]->visible &&
 					(mouse_pos.x > children[i]->transform.x) && 
 					(mouse_pos.x < (children[i]->transform.x + children[i]->transform.z)) &&
 					(mouse_pos.y > children[i]->transform.y) && 
@@ -106,14 +106,12 @@ void UIInteract(UIState *state){
 
 				if((event_type & UI_MOUSE_HOLD) != 0){
 					if(mouse_element->classes[i]->class_hold != NULL){
-						// UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hold);
 						UIElementAddTmpClass(mouse_element, UIFindClass(state, mouse_element->classes[i]->class_hold));
 					}
 				}
 				
 				if((event_type & UI_MOUSE_HOVER) != 0){
 					if(mouse_element->classes[i]->class_hover != NULL){
-						// UIElementAddTmpClass(mouse_element, mouse_element->classes[i]->class_hover);
 						UIElementAddTmpClass(mouse_element, UIFindClass(state, mouse_element->classes[i]->class_hover));
 					}
 				}
@@ -124,6 +122,7 @@ void UIInteract(UIState *state){
 
 			}
 
+			// Specialized input types and calling their input grabbing functions
 			switch(mouse_element->input_type){
 				case UI_INPUT_NONE:
 				default:

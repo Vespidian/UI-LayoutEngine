@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <GL/glew.h>
+#include <SDL2/SDL.h>
 
-#include "textures.h"
 #include "vectorlib.h"
+#include "sdl_gl_init.h"
+#include "event.h"
+#include "textures.h"
 #include "shader.h"
 #include "renderer/renderer.h"
 #include "render_text.h"
@@ -20,7 +23,7 @@ GLTF ui_gltf;
 Mesh ui_mesh;
 
 static void InitUIGL(){
-    ui_gltf = GLTFOpen("../assets/models/plane.gltf");
+	ui_gltf = GLTFOpen("../assets/models/plane.gltf");
 	ui_mesh = ui_gltf.meshes[0];
 
 	if(!ui_mesh.gl_data.is_loaded){
@@ -51,94 +54,107 @@ static void InitUIGL(){
 	ui_vao = NewVAO(ui_mesh.gl_data.vao, 1, 6, ATTR_VEC3, ATTR_VEC2, ATTR_VEC3, ATTR_VEC3, ATTR_VEC4, ATTR_VEC4);
 }
 
-void InitUIRender(){
-    InitUIGL();
-
-    ui_shader = ShaderOpen("../assets/shaders/ui.shader");
-    ShaderUniformSetSampler2D(&ui_shader, "src_texture", 0);
-	ShaderUniformSetMat4(&ui_shader, "tex_coordinates", default_texture_coordinates);
-
-    ShaderUniformSetMat4(&ui_shader, "projection", orthographic_projection);
-
+void SetProjection(){
+	glm_ortho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -1000 / 2, 1000 / 2, orthographic_projection);
+	ShaderUniformSetMat4(&ui_shader, "projection", orthographic_projection);
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
+void InitUIRender(){
+	InitUIGL();
+
+	ui_shader = ShaderOpen("../assets/shaders/ui.shader");
+	ShaderUniformSetSampler2D(&ui_shader, "src_texture", 0);
+	ShaderUniformSetMat4(&ui_shader, "tex_coordinates", default_texture_coordinates);
+
+	ShaderUniformSetMat4(&ui_shader, "projection", orthographic_projection);
+
+
+	BindEvent(EV_POLL_ACCURATE, SDL_WINDOWEVENT, SetProjection);
+}
+
+
+
 void UIRenderElement(UIElement *element){
-    if(element != NULL && element->parent != NULL){
-        Vector3 r = {
-            element->transform.x,
-            element->transform.y,
-            1
-        };
-        Vector2 scale = {
-            element->transform.z,
-            element->transform.w
-        };
+	if(element != NULL && element->parent != NULL && element->visible){
+		Vector3 r = {
+			element->transform.x,
+			element->transform.y,
+			1
+		};
+		Vector2 scale = {
+			element->transform.z,
+			element->transform.w
+		};
 
-        float data[64];
-    	memcpy(&data[0], r.v, sizeof(Vector3));
-    	memcpy(&data[3], scale.v, sizeof(Vector2));
-    	memcpy(&data[5], element->style.color.v, sizeof(Vector3));
-    	memcpy(&data[8], element->style.border_color.v, sizeof(Vector3));
-    	memcpy(&data[11], element->style.border.v, sizeof(Vector4));
+		float data[64];
+		memcpy(&data[0], r.v, sizeof(Vector3));
+		memcpy(&data[3], scale.v, sizeof(Vector2));
+		memcpy(&data[5], element->style.color.v, sizeof(Vector3));
+		memcpy(&data[8], element->style.border_color.v, sizeof(Vector3));
+		memcpy(&data[11], element->style.border.v, sizeof(Vector4));
 
-    	Texture texture_array[16] = {texture};
+		Texture texture_array[16] = {texture};
 
-    	AppendInstance(ui_vao, data, ui_mesh, &ui_shader, 1, texture_array);
+		AppendInstance(ui_vao, data, ui_mesh, &ui_shader, 1, texture_array);
 
-        if(element->text != NULL){
-            RenderText(
-                &default_font, 
-                1.001, 
-                element->transform.x + element->style.border.x + element->style.padding.x, 
-                element->transform.y + element->style.border.y + element->style.padding.y, 
-                TEXT_ALIGN_LEFT,
-                element->text
-            );
-        }
+		if(element->text != NULL){
+			RenderText(
+				&default_font, 
+				1.001, 
+				element->transform.x + element->style.border.x + element->style.padding.x, 
+				element->transform.y + element->style.border.y + element->style.padding.y, 
+				TEXT_ALIGN_LEFT,
+				element->text
+			);
+		}
 
-    }
+	}
 }
 
 // void UIRenderSubElements(UIElement *element){
 void UIRender(UIState *state){
-    if(state != NULL){
-        UIElement *element = &state->elements[0];
-        // Initially we create an array of all children
-        UIElement **children;
-        unsigned int num_children = 1;
-        children = malloc(sizeof(UIElement) * (num_children + 1));
-        children[0] = element;
-        children[num_children + 1] = NULL;
+	if(state != NULL){
 
-	    if(element->num_children != 0){
-            for(int i = 0; children[i] != NULL; i++){
-                if(children[i]->num_children == 0){
-                    continue;
-                }
+		// Root element
+		UIElement *element = &state->elements[0];
+		
+		// Initially we create an array of all children
+		UIElement **children;
+		unsigned int num_children = 1;
+		children = malloc(sizeof(UIElement) * (num_children + 1));
+		children[0] = element;
+		children[num_children + 1] = NULL;
 
-                num_children += children[i]->num_children;
-                children = realloc(children, sizeof(UIElement) * (num_children + 1));
+		if(element->num_children != 0){
+			for(int i = 0; children[i] != NULL; i++){
+				if((children[i]->num_children == 0) || (children[i]->visible_children == false)){
+					continue;
+				}
 
-                for(int k = 0; k < children[i]->num_children; k++){
-                    children[num_children - children[i]->num_children + k] = children[i]->children[k];
-                }
-                children[num_children] = NULL;
-            }
+				num_children += children[i]->num_children;
+				children = realloc(children, sizeof(UIElement) * (num_children + 1));
 
-            
-        }else{
-            UIRenderElement(element);
-        }
+				for(int k = 0; k < children[i]->num_children; k++){
+					children[num_children - children[i]->num_children + k] = children[i]->children[k];
+				}
+				children[num_children] = NULL;
+			}
 
-        // TODO: take a look here, does the below loop not 
-        // render 'element' twice if num_childre is zero?
+			
+		}else{
+			UIRenderElement(element);
+		}
 
-        // Loop from leaves to root
-        for(int i = (num_children - 1); i >= 0; i--){
-            UIRenderElement(children[i]);
-        }
+		// TODO: take a look here, does the below loop not 
+		// render 'element' twice if num_childre is zero?
 
-        free(children);
-        children = NULL;
-    }
+		// Loop from leaves to root
+		for(int i = (num_children - 1); i >= 0; i--){
+			UIRenderElement(children[i]);
+		}
+
+		free(children);
+		children = NULL;
+	}
 }

@@ -322,52 +322,56 @@ void UIElementUpdateSize(UIElement *element){
 			element->style.padding.w + 
 			element->offset.w
 		;
-		if(element->style.wrap_vertical == true){
-			// VERTICAL
-			int widest = 0;
-			for(int i = 0; i < element->num_children; i++){
-				int sum = 0;
 
-				// Child size
-				element->transform.w += element->children[i]->transform.w;
-				sum += element->children[i]->transform.z;
+		if(element->visible_children){
+			if(element->style.wrap_vertical == true){
+				// VERTICAL
+				int widest = 0;
+				for(int i = 0; i < element->num_children; i++){
+					int sum = 0;
 
-				// Child margin
-				element->transform.w += element->children[i]->style.margin.y;
-				element->transform.w += element->children[i]->style.margin.w;
-				sum += element->children[i]->style.margin.x;
-				sum += element->children[i]->style.margin.z;
+					// Child size
+					element->transform.w += element->children[i]->transform.w;
+					sum += element->children[i]->transform.z;
 
-				if(sum > widest){
-					widest = sum;
+					// Child margin
+					element->transform.w += element->children[i]->style.margin.y;
+					element->transform.w += element->children[i]->style.margin.w;
+					sum += element->children[i]->style.margin.x;
+					sum += element->children[i]->style.margin.z;
+
+					if(sum > widest){
+						widest = sum;
+					}
+
 				}
+				element->transform.z += widest;
 
-			}
-			element->transform.z += widest;
+			}else{
+				// HORIZONTAL
+				int tallest = 0;
+				for(int i = 0; i < element->num_children; i++){
+					if(element->children[i]->visible){
+						int sum = 0;
 
-		}else{
-			// HORIZONTAL
-			int tallest = 0;
-			for(int i = 0; i < element->num_children; i++){
-				int sum = 0;
+						// Child size
+						element->transform.z += element->children[i]->transform.z;
+						sum += element->children[i]->transform.w;
 
-				// Child size
-				element->transform.z += element->children[i]->transform.z;
-				sum += element->children[i]->transform.w;
+						// Child margin
+						element->transform.z += element->children[i]->style.margin.x;
+						element->transform.z += element->children[i]->style.margin.z;
+						sum += element->children[i]->style.margin.y;
+						sum += element->children[i]->style.margin.w;
 
-				// Child margin
-				element->transform.z += element->children[i]->style.margin.x;
-				element->transform.z += element->children[i]->style.margin.z;
-				sum += element->children[i]->style.margin.y;
-				sum += element->children[i]->style.margin.w;
+						if(sum > tallest){
+							tallest = sum;
+						}
+					}
 
-				if(sum > tallest){
-					tallest = sum;
 				}
-
+				element->transform.w += tallest;
 			}
-			element->transform.w += tallest;
-
 		}
 
 		// Limit size of element if children go beyond max size

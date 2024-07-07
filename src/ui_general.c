@@ -115,7 +115,12 @@ UIElement *UINewElement(UIState *state){
 
 		e->transform = (iVector4){0, 0, 100, 100};
 		e->offset = (iVector4){0, 0, 0, 0};
+		
 		e->mouse_events = 0;
+		e->visible = true;
+		e->visible_children = true;
+		e->input_type = UI_INPUT_NONE;
+
 		e->class = UIDefaultClass();
 		e->style = UIElementDefaultClass();
 		e->event_func = NULL;

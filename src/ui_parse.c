@@ -15,6 +15,12 @@ static UIState *ui_state_ptr = NULL;
 static UIClass *class_ptr = NULL;
 static UIElement *element_ptr = NULL;
 
+
+static char *boolean_dict[] = {
+	"false",
+	"true",
+	NULL
+};
 static Vector3 HexToColor(char *hex){
 	if(hex[0] == '#'){
 		hex = hex + 1;
@@ -74,6 +80,7 @@ static char *class_attributes[] = {
 
 	"wrap",
 	"wrap-vertical",
+	"wrap-reverse",
 	"cull",
 	"inherit",
 	"origin-c",
@@ -81,6 +88,19 @@ static char *class_attributes[] = {
 
 	"on-hold",
 	"on-hover",
+
+	NULL
+};
+static char *origin_names[] = {
+	"top-left",
+	"top",
+	"top-right",
+	"left",
+	"center",
+	"right",
+	"bottom-left",
+	"bottom",
+	"bottom-right",
 
 	NULL
 };
@@ -178,28 +198,39 @@ static void tfunc2_classes_attributes(JSONState *json, unsigned int token){
 		case 21: // wrap
 			break;
 		case 22: // wrap-vertical
+			class_ptr->wrap_vertical = JSONTokenHash(json, token + 1, boolean_dict);
 			break;
-		case 23: // cull
+		case 23: // wrap-reverse
+			class_ptr->wrap_reverse = JSONTokenHash(json, token + 1, boolean_dict);
 			break;
-		case 24: // inherit
+		case 24: // cull
 			break;
-		case 25: // origin-c
+		case 25: // inherit
 			break;
-		case 26: // origin-p
+		case 26: // origin-c
+			class_ptr->origin_c = JSONTokenHash(json, token + 1, origin_names);
+			break;
+		case 27: // origin-p
+			class_ptr->origin_p = JSONTokenHash(json, token + 1, origin_names);
 			break;
 
 
-		case 27: // on-hold
+		case 28: // on-hold
 			class_ptr->class_hold = NULL;
 			JSONTokenToString(json, token + 1, &class_ptr->class_hold);
 			break;
-		case 28: // on-hover
+		case 29: // on-hover
 			class_ptr->class_hover = NULL;
 			JSONTokenToString(json, token + 1, &class_ptr->class_hover);
 			break;
 		
 
-		default: break;
+		default:
+			char *str = NULL;
+			JSONTokenToString(json, token, &str);
+			DebugLog(D_WARN, "warning: %s: unknown attribute '%s'", json->path, str);
+			free(str);
+			break;
 	}
 }
 

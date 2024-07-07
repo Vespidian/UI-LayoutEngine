@@ -3,7 +3,7 @@
 
 
 typedef enum UI_ORIGIN {
-	UI_ORIGIN_UNDEFINED = 0,
+	UI_ORIGIN_UNDEFINED = -1,
 	UI_ORIGIN_NORTHWEST,
 	UI_ORIGIN_NORTH,
 	UI_ORIGIN_NORTHEAST,
@@ -201,7 +201,8 @@ typedef struct UIElement{
 
 	UI_MOUSE_EVENT mouse_events;
 
-
+	bool visible;
+	bool visible_children;
 
 	UI_INPUT_TYPE input_type;
 	struct UISlider slider;
