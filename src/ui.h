@@ -229,6 +229,7 @@ typedef struct UIElement{
 typedef struct UIState{
 	// Element 0 is the root element that is automatically set 
 	// when initializing a UIState
+	char *path;
 	
 	UIElement elements[UI_STATE_MAX_ELEMENTS];
 	unsigned int num_elements;

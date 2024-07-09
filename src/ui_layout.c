@@ -46,6 +46,11 @@ void UIElementApplyClass(UIElement *element, UIClass *class){
 		(class->color.x == -1) ? true : (element->style.color.x = class->color.x);
 		(class->color.y == -1) ? true : (element->style.color.y = class->color.y);
 		(class->color.z == -1) ? true : (element->style.color.z = class->color.z);
+
+		// Border Color
+		(class->border_color.x == -1) ? true : (element->style.border_color.x = class->border_color.x);
+		(class->border_color.y == -1) ? true : (element->style.border_color.y = class->border_color.y);
+		(class->border_color.z == -1) ? true : (element->style.border_color.z = class->border_color.z);
 		
 		// Wrap
 		(class->wrap == -1) ? true : (element->style.wrap = class->wrap);

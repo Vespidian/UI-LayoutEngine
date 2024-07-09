@@ -92,7 +92,7 @@ void UIRenderElement(UIElement *element){
 		memcpy(&data[3], scale.v, sizeof(Vector2));
 		memcpy(&data[5], element->style.color.v, sizeof(Vector3));
 		memcpy(&data[8], element->style.border_color.v, sizeof(Vector3));
-		memcpy(&data[11], element->style.border.v, sizeof(Vector4));
+		memcpy(&data[11], element->style.border.v, sizeof(iVector4));
 
 		Texture texture_array[16] = {texture};
 

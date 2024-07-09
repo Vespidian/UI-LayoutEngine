@@ -9,8 +9,10 @@
 
 UIState UINewState(){
 	UIState state;
+	state.path = NULL;
 	state.num_classes = 0;
 	state.num_elements = 0;
+	state.focused_element = NULL;
 	return state;
 }
 
@@ -28,6 +30,7 @@ UIClass UIDefaultClass(){
 	c.border = (iVector4){-1, -1, -1, -1};
 	c.margin = (iVector4){-1, -1, -1, -1};
 	c.color = (Vector3){-1, -1, -1};
+	c.border_color = (Vector3){-1, -1, -1};
 
 	c.wrap = -1;
 	c.wrap_vertical = -1;
@@ -71,9 +74,10 @@ UIClass UIElementDefaultClass(){
 	c.size_max = (iVector2){200, 200};
 
 	c.padding = (iVector4){10, 10, 10, 10};
-	c.border = (iVector4){0, 0, 0, 0};
+	c.border = (iVector4){1, 1, 1, 1};
 	c.margin = (iVector4){10, 10, 10, 10};
 	c.color = (Vector3){1, 1, 1};
+	c.border_color = (Vector3){0, 0, 0};
 
 	c.wrap = true;
 	c.wrap_vertical = false;
@@ -237,5 +241,10 @@ UIElement *UIFindElement(UIState *state, char *name){
 			}
 		}
 	}
+
+	if(e == NULL){
+		DebugLog(D_WARN, "warning: %s: cannot find element with name '%s'", state->path, name);
+	}
+
 	return e;
 }

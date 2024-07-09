@@ -13,9 +13,14 @@
 			padding-left: 30,
 		}
 		"changed": {
+			border-color: #abcdef,
 			color: #e2e2e2,
 			on-hover: "extra",
 			origin-c: right,
+			border-left: 3,
+			border-top: 4,
+			border-right: 5,
+			border-bottom: 6,
 		},
 	},
 	elements: [

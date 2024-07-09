@@ -46,19 +46,15 @@ void EngineSetup(){
 
     UIParse(&state, "../assets/ui/new.ui");
 
-
-    // UIClassSetEventFunc(UIFindClass(&state, "root"), SliderFunc);
+    // Create a slider
     UISliderNew(UIFindElement(&state, "b1"), 0, 100, 5, 0.1);
     UIFindElement(&state, "b1")->slider.modify_width = true;
-    // UIFindElement(&state, "b1");
-    // WHEN BACK: FIX THIS CRASH WHEN CALLING FINDELEMENT
-    
-    // UIFindElement(&state, "menu")->visible = false;
+
+    // Implement a show/hide button
     UIFindElement(&state, "hehe")->event_func = tmp;
-    // UIFindElement(&state, "menu")->visible_children = false;
-    // UIFindElement(&state, "b1")->visible = false;
-    // UIFindElement(&state, "b1")->visible_children = false;
-    // UIFindElement(&state, "idk")->visible = false;
+
+
+
     // WHEN COME BACK: 
     // * test out multiple classes on an element
     // * implement inherit class property (apprently this was already done)
@@ -70,7 +66,7 @@ void EngineSetup(){
     // * implement hiding of elements and their children (make sure hidden elements arent interacted with)
 
     // - work on UI serialization to json
-    // - get borders to render in the shader
+    // * get borders to render in the shader
     // - start thinking about percent scaling
 
     // So we want all classes to be stored in a UIState array
@@ -93,11 +89,6 @@ void EngineLoop(){
     UIInteract(&state);
 
     UIRender(&state);
-
-    // UIElement *slid = UIFindElement(&state, "b1");
-    // slid->offset.z = slid->slider.val;
-    // RenderText(&default_font, 1.001, 10, 10, TEXT_ALIGN_LEFT, "val: %f", val);
-
 
     PushRender();
 }

@@ -107,16 +107,17 @@ static char *origin_names[] = {
 static void tfunc2_classes_attributes(JSONState *json, unsigned int token){
 	// Make switch case here with every class attribute
 	int val = -1;
+	char *str = NULL;
 	switch(JSONTokenHash(json, token, class_attributes)){
 		case 0: // color
-			char *color_str = NULL;
-			JSONTokenToString(json, token + 1, &color_str);
-			Vector3 color = HexToColor(color_str);
-			free(color_str);
-			color_str = NULL;
+			JSONTokenToString(json, token + 1, &str);
+			Vector3 color = HexToColor(str);
 			class_ptr->color = color;
 			break;
 		case 1: // border-color
+			JSONTokenToString(json, token + 1, &str);
+			Vector3 border_color = HexToColor(str);
+			class_ptr->border_color = border_color;
 			break;
 
 		case PADDING_INDEX: // padding
@@ -226,12 +227,12 @@ static void tfunc2_classes_attributes(JSONState *json, unsigned int token){
 		
 
 		default:
-			char *str = NULL;
 			JSONTokenToString(json, token, &str);
 			DebugLog(D_WARN, "warning: %s: unknown attribute '%s'", json->path, str);
-			free(str);
 			break;
 	}
+	free(str);
+	str = NULL;
 }
 
 static void tfunc1_classes(JSONState *json, unsigned int token){
@@ -327,6 +328,9 @@ void UIParse(UIState *state, char *path){
 	ui_state_ptr = state;
 
 	if(path != NULL){
+		ui_state_ptr->path = malloc(strlen(path));
+		memcpy(ui_state_ptr->path, path, strlen(path));
+
 		element_ptr = UINewElement(state);
 		
 
